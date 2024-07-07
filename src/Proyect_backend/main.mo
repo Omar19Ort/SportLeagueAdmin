@@ -6,6 +6,14 @@ import Bool "mo:base/Bool";
 
 actor SportLeagueAdmin{
       let player = Players.HashMap<Text, Player>(5, Text.equal, Text.hash);
+
+      type PlayerResult = {
+    #Success : Text;
+    #NotFound : Text;
+    #Error : Text;
+      };
+
+
     type Player = {
       id: Text;
       first_Name: Text;
@@ -15,7 +23,7 @@ actor SportLeagueAdmin{
       activo: Bool;
     };
       //Create player
-    public func setPlayer(index: Text, id: Text, first_Name: Text, last_Name: Text, age:Nat,height:Float, activo:Bool): async () {
+    public func setPlayer(index: Text, id: Text, first_Name: Text, last_Name: Text, age:Nat,height:Float, activo:Bool): async PlayerResult {
       let newPlayer: Player = {
         id = id;
         first_Name = first_Name;
@@ -24,20 +32,30 @@ actor SportLeagueAdmin{
         height= height;
         activo = activo;
       };
-
       player.put(index, newPlayer);
+      return #Success("Player registered");
     };
+
+
     //Get player
     public func getPlayer(index: Text): async ?Player {
-      return player.get(index);
-      };
+            return player.get(index);
+    };
+
+
       //Delete player
-      public func deletePlayer(index: Text): async () {
-        player.delete(index);
-        };
+    public func deletePlayer(index: Text): async () {
+            player.delete(index);
+    };
+
+
         //Update player
         public func updatePlayer(index: Text, id: Text, first_Name: Text, last_Name
-        : Text, age:Nat,height : Float, activo:Bool): async () {
+        : Text, age:Nat,height : Float, activo:Bool): async ?Text {
+        if (age < 18 or age > 40) {
+            return ?("The player's age must be between 18 and 40 years");
+        };
+          
           let newPlayer: Player = {
             id = id;
             first_Name = first_Name;
@@ -47,6 +65,7 @@ actor SportLeagueAdmin{
             activo = activo;
             };
             player.put(index, newPlayer);
+            return null;
             };
             //Get all players
            public func getAllPlayers(): async Text {
@@ -68,13 +87,14 @@ actor SportLeagueAdmin{
     };
 
   //Create team
-  public func setTeam(index: Text,id: Text, name: Text, city: Text): async () {
+  public func setTeam(index: Text,id: Text, name: Text, city: Text): async PlayerResult {
     let newTeam: Team = {
       id = id;
       name = name;
       city = city;
       };
       team.put(index, newTeam);
+      return #Success("Team registered");
       };
 
       //Get team
