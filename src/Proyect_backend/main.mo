@@ -1,11 +1,25 @@
 import Nat "mo:base/Nat";
 import Text "mo:base/Text";
 import Players "mo:base/HashMap";
-import Teams "mo:base/HashMap";
+import Equipo "mo:base/HashMap";
 import Bool "mo:base/Bool";
+import Float "mo:base/Float";
+import Principal "mo:base/Principal";
 
 actor SportLeagueAdmin{
-      let player = Players.HashMap<Text, Player>(5, Text.equal, Text.hash);
+    public query (message) func whoAmi(): async Text{
+      if(Principal.isAnonymous(message.caller)){
+        return "No estas logueado";
+      };
+      return "Hola, soy el administrador de la liga";
+
+      
+    };
+
+
+
+      var player = Players.HashMap<Text, Player>(5, Text.equal, Text.hash);
+      var team = Equipo.HashMap<Text,Team>(5, Text.equal, Text.hash);
 
       type PlayerResult = {
     #Success : Text;
@@ -13,7 +27,13 @@ actor SportLeagueAdmin{
     #Error : Text;
       };
 
-
+      //STABLE Players
+      stable var id : ?Text = null;
+      stable var first_Name : ?Text = null;
+      stable var last_Name : ?Text = null;
+      stable var age : Nat = 0;
+      stable var height : Float = 0;
+      stable var activo : Bool = false;
     type Player = {
       id: Text;
       first_Name: Text;
@@ -24,6 +44,9 @@ actor SportLeagueAdmin{
     };
       //Create player
     public func setPlayer(index: Text, id: Text, first_Name: Text, last_Name: Text, age:Nat,height:Float, activo:Bool): async PlayerResult {
+      if (Text.equal(index, "")) {
+            return #Error("Player with this index already exists");
+        };
       let newPlayer: Player = {
         id = id;
         first_Name = first_Name;
@@ -76,20 +99,22 @@ actor SportLeagueAdmin{
               return pairs;
            };
 
-
+          //Stable teams
+        stable var id_team : ?Text = null;
+        stable var team_name : ?Text = null;
+        stable var city : ?Text = null;
 
            //Teams
-    let team = Teams.HashMap<Text,Team>(5, Text.equal, Text.hash);
         type Team = {
-          id: Text;
+          id_team: Text;
           name: Text;
           city: Text;
     };
 
   //Create team
-  public func setTeam(index: Text,id: Text, name: Text, city: Text): async PlayerResult {
+  public func setTeam(index: Text,id_team: Text, name: Text, city: Text): async PlayerResult {
     let newTeam: Team = {
-      id = id;
+      id_team = id_team;
       name = name;
       city = city;
       };
@@ -108,10 +133,10 @@ actor SportLeagueAdmin{
           };
 
           //Update team
-          public func updateTeam(index: Text, id: Text, name: Text, city: Text
+          public func updateTeam(index: Text, id_team: Text, name: Text, city: Text
           ): async () {
             let newTeam: Team = {
-              id = id;
+              id_team = id_team;
               name = name;
               city = city;
               };
@@ -122,9 +147,8 @@ actor SportLeagueAdmin{
               public func getAllTeams(): async Text {
                 var pairs : Text = "";
                 for((key,val) in team.entries()){
-                  pairs := "("#key#":"#val.id#")"#pairs;
+                  pairs := "("#key#":"#val.id_team#")"#pairs;
                   };
                   return pairs;
                   };
-
 };
